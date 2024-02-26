@@ -611,25 +611,28 @@ class _AddTaskPage extends State<AddTaskPage> {
       messageControl.addTask(task);
     }
 
-    Get.defaultDialog(onConfirm: () {
-          Get.back();
-        },
-        title: "",
-        titlePadding:const EdgeInsets.all(0),
-        middleText: _editTask == null ? "发布成功" : "更新成功",
-        barrierDismissible: false,
-        textConfirm: "确定"
-      ).then((value) => Get.back());
+    showToastMsg(_editTask == null ? "发布成功" : "更新成功");
+    Get.back();
+
+    // Get.defaultDialog(onConfirm: () {
+    //       Get.back();
+    //     },
+    //     title: "",
+    //     titlePadding:const EdgeInsets.all(0),
+    //     middleText: _editTask == null ? "发布成功" : "更新成功",
+    //     barrierDismissible: false,
+    //     textConfirm: "确定"
+    //   ).then((value) => Get.back());
   }
 
   Widget getSubmitButton() {
     if (_editTask == null) {
-      return ElevatedButton(
+      return FilledButton(
                 onPressed: submitTask,
                 child:const Text("发布任务")
               );
     }else{
-      return ElevatedButton(
+      return FilledButton(
                 onPressed: submitEditTask,
                 child:const Text("修改")
               );

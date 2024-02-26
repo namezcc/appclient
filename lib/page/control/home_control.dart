@@ -13,7 +13,7 @@ class HomeControl extends GetxController {
   final TaskListId taskList = TaskListId();
   LoadState loadTaskState = LoadState.none;
   TaskConfig taskConfig = TaskConfig(0, 0, 0, 0, 0,0,0);
-  bool taskInitRefresh = false;
+  bool taskInitRefresh = true;
   bool getLocation = false;
   double taskListOffset = 0;
   JsonAddressInfo? myLocation;
@@ -135,4 +135,12 @@ class HomeControl extends GetxController {
   JsonTaskInfo getHomeTask(int index) {
     return getTask(taskList.list[index]);
   }
+
+  Future<JsonTaskInfo?> loadTask(String taskid) async {
+    var res = await apiUpdateOneTask(taskid);
+    if (res != null) {
+      updateAllTaskOne(res);
+    }
+    return res;
+  } 
 }

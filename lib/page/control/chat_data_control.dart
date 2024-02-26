@@ -276,4 +276,10 @@ class ChatDataControl {
     }
     return null;
   }
+
+  void sendTaskChat(String taskid,JsonChatInfo chat) {
+    chat.index = -1;
+    var tc = JsonTaskChatInfo(taskid,[chat]);
+    TcpControl.instance.sendJsonData(NetCMMsgId.taskChat, tc.toJson());
+  }
 }

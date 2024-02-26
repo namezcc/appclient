@@ -8,6 +8,14 @@
 			"label": "build json class",
 			"type": "shell",
 			"command": "dart run build_runner build --delete-conflicting-outputs"
-		}
+		},
+		{
+			"label": "start adb",
+			"type": "shell",
+			"command": "./adb.bat",
+			"options": {
+				"cwd": "${workspaceFolder}/"
+			}
+		},
 	]
 }

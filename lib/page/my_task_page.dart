@@ -87,7 +87,9 @@ class _MyTaskPage extends State<MyTaskPage> {
                       control: _messageControl,
                       onTap: () async {
                         await Get.toNamed(Routes.taskTalk,arguments: {"task":task});
-                        _.refreshTaskChatState(task.id);
+                        Future.delayed(const Duration(seconds: 1),() {
+                          _.refreshTaskChatState(task.id);
+                        },);
                       },
                     );
                   }

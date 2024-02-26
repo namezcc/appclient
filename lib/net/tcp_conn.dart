@@ -22,6 +22,7 @@ class TcpConn {
   final List<int> _readData = [];
   bool _closeBySelf = false;
   final int _reconnectInterval;
+  bool _inReconnect = false;
 
   
   void connect() async {
@@ -30,7 +31,7 @@ class TcpConn {
       _socket = socket;
       _readData.clear();
       _socket?.listen(onReciveMsg,onError: (err){
-        logError(err.toString());
+        logError("conn on err", err: err);
         reconnect();
       },onDone: () {
         logError("tcp conn down");
@@ -38,7 +39,7 @@ class TcpConn {
       },);
       onConnected();
     } catch (e) {
-      logError(e.toString());
+      logError("conn catch err ${e.toString()}");
       reconnect();
     }
   }
@@ -64,7 +65,7 @@ class TcpConn {
       }else{
         sublist = [];
       }
-      onReadNetPack(pid,NetPack(sublist));
+      onReadNetPack(pid,NetPack.fromPack(sublist));
       offset += packlen;
     }
 
@@ -82,12 +83,19 @@ class TcpConn {
   }
 
   void reconnect() async {
-    if (_socket == null && _closeBySelf == false) {
+    if (_closeBySelf == true) {
+      logInfo("reconnect fail");
       return;
     }
+    if (_inReconnect) {
+      return;
+    }
+
     _socket?.close();
     _socket = null;
+    _inReconnect = true;
     Future.delayed(Duration(seconds: _reconnectInterval),() {
+      _inReconnect = false;
       if (_closeBySelf == false) {
         connect();
       }

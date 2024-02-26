@@ -60,6 +60,8 @@ dependencies:
   sqflite: ^2.3.1
   path: ^1.8.3
   flutter_image_compress: ^2.1.0
+  flutter_swipe_action_cell: ^3.1.3
+  crop_your_image: ^1.0.1
 
 dev_dependencies:
   flutter_test:
@@ -89,6 +91,7 @@ flutter:
   assets:
     - assets/json/
     - assets/image/emoji/
+    - assets/image/icon/
   fonts:
     - family: iconfont
       fonts:

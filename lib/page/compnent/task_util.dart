@@ -1,7 +1,6 @@
 import 'package:bangbang/common/global_data.dart';
 import 'package:bangbang/define/define.dart';
 import 'package:bangbang/define/json_class.dart';
-import 'package:bangbang/routes/app_page.dart';
 
 class TaskUtil {
   static String getNumString(JsonTaskInfo task) {
@@ -54,14 +53,6 @@ class TaskUtil {
   }
 
   static JsonTaskInfo empttTask = JsonTaskInfo(0, "", "", "", 0, 0, 0, 0, 0, 0);
-
-  static String getTaskToPage(JsonTaskInfo t,int cid) {
-    if (t.cid == cid || inJoin(t, cid)) {
-      return Routes.taskTalk;
-    }else{
-      return Routes.taskInfo;
-    }
-  }
 
   static List<int> getJoinNum(JsonTaskInfo t) {
     var res = [0,0];

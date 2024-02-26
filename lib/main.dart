@@ -25,7 +25,25 @@ void readConfig() async {
   MapConfig.geotolocationurl = jsdata["geotolocationurl"];
 }
 
+// String _extractErrorInformation(FlutterErrorDetails details) {
+//   return 'Error: ${details.exception}\n'
+//       'Stack Trace: ${details.stack}\n'
+//       'Context: ${details.context}\n';
+// }
+
 Future<void> main() async {
+
+  // FlutterError.onError =(details) async {
+  //   final info = _extractErrorInformation(details);
+  //   if (kDebugMode) {
+  //     logError(info);
+  //   }else{
+  //     await apiAppCrash(info);
+  //     exit(1);
+  //   }
+  // };
+
+
   WidgetsFlutterBinding.ensureInitialized();
   readConfig();
   initDio();
@@ -35,7 +53,7 @@ Future<void> main() async {
 final List<Permission> needPermissionList = [
   Permission.location,
   Permission.storage,
-  Permission.phone,
+  // Permission.phone,
 ];
 
 class MyApp extends StatefulWidget {
@@ -95,8 +113,12 @@ class _MyApp extends State<MyApp> {
           colorScheme: ColorScheme.fromSeed(
             seedColor:const Color(0xFFD32F2F),
             background: Colors.grey.shade100,
-            surface: Colors.white
+            surface: Colors.white,
+            surfaceTint:Colors.white,
+            tertiary:Colors.grey.shade700
+            
           ),
+          platform: TargetPlatform.iOS,
           appBarTheme:const AppBarTheme(scrolledUnderElevation: 0),
           useMaterial3: true,
         ),

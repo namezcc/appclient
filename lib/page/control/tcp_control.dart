@@ -8,6 +8,7 @@ import 'package:bangbang/define/json_class.dart';
 import 'package:bangbang/net/net_pack.dart';
 import 'package:bangbang/net/tcp_conn.dart';
 import 'package:bangbang/page/control/chat_data_control.dart';
+import 'package:bangbang/page/control/chat_user_data_control.dart';
 
 typedef OnHandleNetMsg = Function(NetPack);
 
@@ -42,6 +43,8 @@ class TcpControl {
     _handle[NetSmMsgId.chatUpdate.index] = _onChatUpdate;
     _handle[NetSmMsgId.chatIndex.index] = _onChatIndex;
     _handle[NetSmMsgId.chatRead.index] = _onChatRead;
+    _handle[NetSmMsgId.chatUser.index] = _onGetChatUser;
+    _handle[NetSmMsgId.chatUserSended.index] = _onChatUserSended;
     
   }
 
@@ -143,5 +146,32 @@ class TcpControl {
         control.setTaskChatRead(read.taskid, read.index);
       }
     });
+  }
+
+  void _onGetChatUser(NetPack p) {
+    parseJson(p,(jd) async {
+      var d = jd as List<dynamic>;
+      List<JsonChatUser> res = [];
+      for (var e in d) {
+        var read = JsonChatUser.fromJson(e);
+        res.add(read);
+      }
+      ChatUserDataControl.instance.onGetChatUser(res);
+    });
+  }
+
+  void _onChatUserSended(NetPack p) {
+    var cid = p.readInt64();
+    var mycid = p.readInt64();
+    var oldid = p.readInt64();
+    var newid = p.readInt64();
+    ChatUserDataControl.instance.onChatUserSended(cid,mycid, oldid, newid);
+  }
+
+  void sendGetUserChat(int low,int hei) {
+    var p = NetPack.newPack();
+    p.writeInt64(low);
+    p.writeInt64(hei);
+    sendNetPack(NetCMMsgId.chatUserGet,p);
   }
 }

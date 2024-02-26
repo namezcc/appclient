@@ -15,6 +15,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final colorscheme = Get.theme.colorScheme;
+
   @override
   Widget build(BuildContext context) {
     var userControl = Get.find<UserControl>();
@@ -26,6 +28,8 @@ class _HomePageState extends State<HomePage> {
         bottomNavigationBar: NavigationBar(
           onDestinationSelected: controller.onBarSelected,
           selectedIndex: controller.barindex,
+          // backgroundColor: colorscheme.surface,
+          surfaceTintColor: colorscheme.surface,
           destinations: const [
             NavigationDestination(icon:Icon(Icons.handshake), label: "help"),
             NavigationDestination(icon:Icon(Icons.messenger), label: "message"),

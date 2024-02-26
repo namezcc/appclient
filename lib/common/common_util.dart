@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:bangbang/common/loger.dart';
+import 'package:bangbang/define/define.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:intl/intl.dart';
@@ -32,6 +35,21 @@ class CommonUtil {
     return mf;
   }
 
+  static Future<dio.MultipartFile?> multipartFileFromByteData(AssetEntity entity,Uint8List bytes) async {
+    dio.MultipartFile mf;
+    
+    // final combytes = await FlutterImageCompress.compressWithList(bytes,
+    //     minHeight: entity.height,
+    //     minWidth: entity.width,
+    //     quality: 80,
+    //     format: entity.mimeType!.contains("png") ? CompressFormat.png:CompressFormat.jpeg
+    //   );
+    mf = dio.MultipartFile.fromBytes(bytes,
+      filename: entity.title
+    );
+    return mf;
+  }
+
   static String getTimeDiffString(int timeStamp,DateTime now) {
     DateTime dateTimeA = DateTime.fromMillisecondsSinceEpoch(timeStamp * 1000);
 
@@ -48,5 +66,20 @@ class CommonUtil {
 
   static int getNowSecond() {
     return DateTime.now().millisecondsSinceEpoch~/1000;
+  }
+
+  static int getNowMillSecond() {
+    return DateTime.now().millisecondsSinceEpoch;
+  }
+
+  static String getShortChatContent(int ctype,String content) {
+    if (ctype == ChatContentType.image.index) {
+      return "[图片]";
+    }else if (ctype == ChatContentType.task.index) {
+      return "[任务]";
+    }
+    else{
+      return content;
+    }
   }
 }

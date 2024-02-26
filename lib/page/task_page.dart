@@ -1,10 +1,10 @@
 import 'package:bangbang/common/global_data.dart';
 import 'package:bangbang/page/compnent/task_list_title.dart';
-import 'package:bangbang/page/compnent/task_util.dart';
 import 'package:bangbang/page/compnent/tool_compnent.dart';
 import 'package:bangbang/page/control/home_control.dart';
 import 'package:bangbang/page/control/map_location_control.dart';
 import 'package:bangbang/page/control/user_control.dart';
+import 'package:bangbang/page/search_page.dart';
 import 'package:bangbang/routes/app_page.dart';
 import 'package:bangbang/util/db_util.dart';
 import 'package:flutter/material.dart';
@@ -74,8 +74,8 @@ class _TaskPage extends State<TaskPage> {
     final colorscheme = Get.theme.colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title:const Text("task"),
-        centerTitle: true,
+        // title:const Text("task"),
+        // centerTitle: true,
         actions: [
           IconButton(onPressed: () {
             // Get.dialog( Center(
@@ -100,6 +100,7 @@ class _TaskPage extends State<TaskPage> {
             //       ),
             //   useSafeArea: false
             //   );
+            Get.to(()=>const SearchPage());
           }, icon: Icon(Icons.search,color: colorscheme.primary))
         ],
         leading: IconButton(
@@ -144,13 +145,13 @@ class _TaskPage extends State<TaskPage> {
                   builder: (_) {
                     var task = controller.getHomeTask(index);
                     return Container(
-                        margin:const EdgeInsets.only(top: 10,left: 5,right: 5),
+                        margin:const EdgeInsets.only(top: 0,left: 5,right: 5),
                         child: TaskListTitle(
                           task,
                           onTap: () {
-                            Get.toNamed(TaskUtil.getTaskToPage(task,_userControl.userInfo.cid) ,arguments: {"task":task});
+                            Get.toNamed(Routes.taskInfo ,arguments: {"task":task});
                             // 保存记录
-                            if (_userControl.userInfo.cid != task.cid) {
+                            if (_userControl.isLogin() && _userControl.userInfo.cid != task.cid) {
                               DbUtil.instance.saveReadTask(task);
                             }
                           },

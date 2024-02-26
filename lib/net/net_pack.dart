@@ -13,9 +13,9 @@ class NetPack {
   late ByteData _reader;
   int offset = 0;
 
-  static NetPack fromPack(Uint8List p) {
+  static NetPack fromPack(List<int> p) {
     var pack = NetPack(p);
-    pack._reader = ByteData.view(p.buffer);
+    pack._reader = ByteData.view(Uint8List.fromList(p).buffer);
     return pack;
   }
 
@@ -31,6 +31,16 @@ class NetPack {
     }
     var v = _reader.getInt32(offset,Endian.little);
     offset+=4;
+    return v;
+  }
+
+  int readInt64() {
+    if (offset + 8 > _pack.length) {
+      logError("read int64 pack len overflow");
+      return 0;
+    }
+    var v = _reader.getInt64(offset,Endian.little);
+    offset += 8;
     return v;
   }
 
@@ -67,6 +77,13 @@ class NetPack {
     var l = Uint8List(4);
     var b = ByteData.view(l.buffer);
     b.setInt32(0, v,Endian.little);
+    _pack.addAll(l);
+  }
+
+  void writeInt64(int v) {
+    var l = Uint8List(8);
+    var b = ByteData.view(l.buffer);
+    b.setInt64(0, v,Endian.little);
     _pack.addAll(l);
   }
 

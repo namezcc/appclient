@@ -129,6 +129,9 @@ class JsonTaskResult {
   @JsonKey(name: 'locMax')
   int locMax;
 
+  @JsonKey(name: 'search',defaultValue: "")
+  String search = "";
+
   TaskConfig(this.globelLimit,this.longitude,this.latitude,this.minDistance,this.locLimit,this.globelMax,this.locMax,);
 
   factory TaskConfig.fromJson(Map<String, dynamic> srcJson) => _$TaskConfigFromJson(srcJson);
@@ -340,9 +343,16 @@ class JsonSimpleUserInfo {
   @JsonKey(name: 'name')
   String name;
 
+  @JsonKey(defaultValue: 0)
   int sex;
+
+  @JsonKey(defaultValue: "")
   String icon = "";
+
+  @JsonKey(defaultValue: 0)
   int state = 0;
+
+  @JsonKey(defaultValue: 0)
   int money = 0;
 
   JsonSimpleUserInfo(this.cid,this.name,this.sex);
@@ -405,7 +415,7 @@ class JsonChatInfo extends Object {
   @JsonKey(name: 'content_type')
   int contentType;
 
-  @JsonKey(name: 'index')
+  @JsonKey(name: 'index',defaultValue: 0)
   int index = 0;
 
   JsonChatInfo(this.cid,this.sendername,this.sendericon,this.sendTime,this.content,this.contentType,);
@@ -414,6 +424,26 @@ class JsonChatInfo extends Object {
 
   Map<String, dynamic> toJson() => _$JsonChatInfoToJson(this);
 
+}
+
+@JsonSerializable()
+class JsonChatUser extends JsonChatInfo {
+
+  @JsonKey(name: 'tocid',defaultValue: 0)
+  int tocid = 0;
+
+  @JsonKey(name: 'chatid',defaultValue: 0)
+  int chatid = 0;
+
+  @JsonKey(name: 'keycid',defaultValue: 0)
+  int keycid = 0;
+
+  JsonChatUser(super.cid, super.sendername, super.sendericon, super.sendTime, super.content, super.contentType);
+
+  factory JsonChatUser.fromJson(Map<String, dynamic> srcJson) => _$JsonChatUserFromJson(srcJson);
+
+  @override
+  Map<String, dynamic> toJson() => _$JsonChatUserToJson(this);
 }
 
 @JsonSerializable()
@@ -478,4 +508,42 @@ class TaskFinishChange {
 
   factory TaskFinishChange.fromJson(Map<String, dynamic> srcJson) => _$TaskFinishChangeFromJson(srcJson);
   Map<String, dynamic> toJson() => _$TaskFinishChangeToJson(this);
+}
+
+@JsonSerializable()
+class HttpBlackList extends HttpData {
+  HttpBlackList(super.code, super.msg);
+
+  @JsonKey(defaultValue: [])
+  List<int> data = [];
+
+  factory HttpBlackList.fromJson(Map<String,dynamic> json) => _$HttpBlackListFromJson(json);
+  @override
+  Map<String,dynamic> toJson() => _$HttpBlackListToJson(this);  
+
+}
+
+@JsonSerializable()
+class HttpUserList extends HttpData {
+  HttpUserList(super.code, super.msg);
+
+  @JsonKey(defaultValue: [])
+  List<JsonSimpleUserInfo> data = [];
+
+  factory HttpUserList.fromJson(Map<String,dynamic> json) => _$HttpUserListFromJson(json);
+  @override
+  Map<String,dynamic> toJson() => _$HttpUserListToJson(this);
+
+}
+
+@JsonSerializable()
+class HttpUserInterest extends HttpData {
+  HttpUserInterest(super.code, super.msg);
+
+  @JsonKey(defaultValue: [])
+  List<String> data = [];
+
+  factory HttpUserInterest.fromJson(Map<String,dynamic> json) => _$HttpUserInterestFromJson(json);
+  @override
+  Map<String,dynamic> toJson() => _$HttpUserInterestToJson(this);
 }

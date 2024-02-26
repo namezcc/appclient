@@ -36,7 +36,7 @@ abstract class TaskRefreshControl extends GetxController {
       if (taskres.isEmpty) {
         setLoadTaskState(LoadState.noMore);
       }else{
-        taskOffset += taskres.length;
+        taskSkip += taskres.length;
         if (taskres.length < 20) {
           setLoadTaskState(LoadState.noMore);
         }else{

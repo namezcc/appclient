@@ -79,7 +79,7 @@ class TaskMemberPage extends StatelessWidget {
                   leading: Stack(
                     alignment: Alignment.bottomRight,
                     children: [
-                      CircleAvatar(backgroundColor: colorscheme.secondary),
+                      ToolCompnent.toUserPage(ToolCompnent.headIcon(joininfo.icon),_taskInfo.cid),
                       getIcon(joininfo)
                     ]
                   ),

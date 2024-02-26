@@ -101,7 +101,7 @@ TaskConfig _$TaskConfigFromJson(Map<String, dynamic> json) => TaskConfig(
       json['loc_limit'] as int,
       json['globelMax'] as int,
       json['locMax'] as int,
-    );
+    )..search = json['search'] as String? ?? '';
 
 Map<String, dynamic> _$TaskConfigToJson(TaskConfig instance) =>
     <String, dynamic>{
@@ -112,6 +112,7 @@ Map<String, dynamic> _$TaskConfigToJson(TaskConfig instance) =>
       'loc_limit': instance.locLimit,
       'globelMax': instance.globelMax,
       'locMax': instance.locMax,
+      'search': instance.search,
     };
 
 JsonMapSearch _$JsonMapSearchFromJson(Map<String, dynamic> json) =>
@@ -257,11 +258,11 @@ JsonSimpleUserInfo _$JsonSimpleUserInfoFromJson(Map<String, dynamic> json) =>
     JsonSimpleUserInfo(
       json['cid'] as int,
       json['name'] as String,
-      json['sex'] as int,
+      json['sex'] as int? ?? 0,
     )
-      ..icon = json['icon'] as String
-      ..state = json['state'] as int
-      ..money = json['money'] as int;
+      ..icon = json['icon'] as String? ?? ''
+      ..state = json['state'] as int? ?? 0
+      ..money = json['money'] as int? ?? 0;
 
 Map<String, dynamic> _$JsonSimpleUserInfoToJson(JsonSimpleUserInfo instance) =>
     <String, dynamic>{
@@ -316,7 +317,7 @@ JsonChatInfo _$JsonChatInfoFromJson(Map<String, dynamic> json) => JsonChatInfo(
       json['send_time'] as int,
       json['content'] as String,
       json['content_type'] as int,
-    )..index = json['index'] as int;
+    )..index = json['index'] as int? ?? 0;
 
 Map<String, dynamic> _$JsonChatInfoToJson(JsonChatInfo instance) =>
     <String, dynamic>{
@@ -327,6 +328,33 @@ Map<String, dynamic> _$JsonChatInfoToJson(JsonChatInfo instance) =>
       'content': instance.content,
       'content_type': instance.contentType,
       'index': instance.index,
+    };
+
+JsonChatUser _$JsonChatUserFromJson(Map<String, dynamic> json) => JsonChatUser(
+      json['cid'] as int,
+      json['sendername'] as String,
+      json['sendericon'] as String? ?? '',
+      json['send_time'] as int,
+      json['content'] as String,
+      json['content_type'] as int,
+    )
+      ..index = json['index'] as int? ?? 0
+      ..tocid = json['tocid'] as int? ?? 0
+      ..chatid = json['chatid'] as int? ?? 0
+      ..keycid = json['keycid'] as int? ?? 0;
+
+Map<String, dynamic> _$JsonChatUserToJson(JsonChatUser instance) =>
+    <String, dynamic>{
+      'cid': instance.cid,
+      'sendername': instance.sendername,
+      'sendericon': instance.sendericon,
+      'send_time': instance.sendTime,
+      'content': instance.content,
+      'content_type': instance.contentType,
+      'index': instance.index,
+      'tocid': instance.tocid,
+      'chatid': instance.chatid,
+      'keycid': instance.keycid,
     };
 
 JsonTaskChatInfo _$JsonTaskChatInfoFromJson(Map<String, dynamic> json) =>
@@ -386,4 +414,49 @@ Map<String, dynamic> _$TaskFinishChangeToJson(TaskFinishChange instance) =>
       'join': instance.join,
       'money': instance.money,
       'getmoney': instance.getmoney,
+    };
+
+HttpBlackList _$HttpBlackListFromJson(Map<String, dynamic> json) =>
+    HttpBlackList(
+      json['code'] as int,
+      json['msg'] as String? ?? '',
+    )..data =
+        (json['data'] as List<dynamic>?)?.map((e) => e as int).toList() ?? [];
+
+Map<String, dynamic> _$HttpBlackListToJson(HttpBlackList instance) =>
+    <String, dynamic>{
+      'code': instance.code,
+      'msg': instance.msg,
+      'data': instance.data,
+    };
+
+HttpUserList _$HttpUserListFromJson(Map<String, dynamic> json) => HttpUserList(
+      json['code'] as int,
+      json['msg'] as String? ?? '',
+    )..data = (json['data'] as List<dynamic>?)
+            ?.map((e) => JsonSimpleUserInfo.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        [];
+
+Map<String, dynamic> _$HttpUserListToJson(HttpUserList instance) =>
+    <String, dynamic>{
+      'code': instance.code,
+      'msg': instance.msg,
+      'data': instance.data,
+    };
+
+HttpUserInterest _$HttpUserInterestFromJson(Map<String, dynamic> json) =>
+    HttpUserInterest(
+      json['code'] as int,
+      json['msg'] as String? ?? '',
+    )..data = (json['data'] as List<dynamic>?)
+            ?.map((e) => e as String)
+            .toList() ??
+        [];
+
+Map<String, dynamic> _$HttpUserInterestToJson(HttpUserInterest instance) =>
+    <String, dynamic>{
+      'code': instance.code,
+      'msg': instance.msg,
+      'data': instance.data,
     };

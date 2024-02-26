@@ -1,4 +1,3 @@
-
 import 'package:bangbang/common/global_data.dart';
 import 'package:bangbang/common/loger.dart';
 import 'package:bangbang/common/map.dart';
@@ -98,10 +97,10 @@ Future<void> apiUserRefreshToken(String token) async {
   }
 }
 
-Future<HttpDataUserInfo?> apiGetUserInfo() async {
+Future<HttpDataUserInfo?> apiGetUserInfo({int? cid}) async {
   final url = "${GlobalData.hostBase}/getUserInfo";
   try {
-    final res = await dio.get(url);
+    final res = await dio.get(url,queryParameters: {"cid":cid});
     if (res.statusCode == 200) {
       return HttpDataUserInfo.fromJson(res.data);
     }else{
@@ -287,13 +286,12 @@ Future<List<JsonTaskInfo>?> apiLoadJoinTaskList(int skip) async {
   return null;
 }
 
-Future<TaskNumChange?> apiJoinTask(String id) async {
+Future<HttpTaskNumChange?> apiJoinTask(String id) async {
   try {
     final url = "${GlobalData.hostBase}/apiJoinTask";
     final res = await dio.get(url,queryParameters: {"taskid":id});
     if (res.statusCode == 200) {
-      var jsdata = HttpTaskNumChange.fromJson(res.data);
-	    return jsdata.data;
+	    return HttpTaskNumChange.fromJson(res.data);
     }else{
       logError("${res.statusMessage}");
     }
@@ -452,4 +450,173 @@ Future<bool> apiEditSex(int sex) async {
     logError(e.toString());
   }
 	return false;
+}
+
+Future<bool> apiReportTask(Map<String, dynamic> param) async {
+  try {
+    final url = "${GlobalData.hostBase}/apiReportTask";
+    final res = await dio.post(url,data: param);
+    if (res.statusCode == 200) {
+      return HttpData.fromJson(res.data).code == 0;
+    }
+  } catch (e) {
+    logError(e.toString());
+  }
+  return false;
+}
+
+Future<bool> apiReportUser(Map<String, dynamic> param) async {
+  try {
+    final url = "${GlobalData.hostBase}/apiReportUser";
+    final res = await dio.post(url,data: param);
+    if (res.statusCode == 200) {
+      return HttpData.fromJson(res.data).code == 0;
+    }
+  } catch (e) {
+    logError(e.toString());
+  }
+  return false;
+}
+
+Future<HttpBlackList?> apiGetBlackList() async {
+  try {
+    final url = "${GlobalData.hostBase}/apiGetBlackList";
+    var res = await dio.get(url);
+    if (res.statusCode == 200) {
+      return HttpBlackList.fromJson(res.data);
+    }
+  } catch (e) {
+    logError(e.toString());
+  }
+	return null;
+}
+
+Future<bool> apiPushBlackList(int cid) async {
+  try {
+    final url = "${GlobalData.hostBase}/apiPushBlackList";
+    var res = await dio.get(url,queryParameters: {"cid":cid});
+    if (res.statusCode == 200) {
+      return HttpData.fromJson(res.data).code == 0;
+    }
+  } catch (e) {
+    logError(e.toString());
+  }
+	return false;
+}
+
+Future<bool> apiPullBlackList(int cid) async {
+  try {
+    final url = "${GlobalData.hostBase}/apiPullBlackList";
+    var res = await dio.get(url,queryParameters: {"cid":cid});
+    if (res.statusCode == 200) {
+      return HttpData.fromJson(res.data).code == 0;
+    }
+  } catch (e) {
+    logError(e.toString());
+  }
+	return false;
+}
+
+Future<HttpUserList?> apiGetUserList(List<int> param) async {
+  try {
+    final url = "${GlobalData.hostBase}/apiGetUserList";
+    final res = await dio.post(url,data:{"cids":param});
+    if (res.statusCode == 200) {
+      return HttpUserList.fromJson(res.data);
+    }
+  } catch (e) {
+    logError(e.toString());
+  }
+  return null;
+}
+
+Future<JsonHttpTaskResult?> apiSearchTask(TaskConfig config) async {
+  try {
+    final url = "${GlobalData.hostBase}/apiSearchTask";
+    final res = await dio.post(url,data: config.toJson());
+    if (res.statusCode == 200) {
+      return JsonHttpTaskResult.fromJson(res.data);
+    }else{
+      return null;
+    }
+  } catch (e) {
+    logError(e.toString());
+    return null;
+  }
+}
+
+Future<HttpUserInterest?> apiLoadInterest() async {
+  try {
+    final url = "${GlobalData.hostBase}/apiLoadInterest";
+    final res = await dio.get(url);
+    if (res.statusCode == 200) {
+      return HttpUserInterest.fromJson(res.data);
+    }
+  } catch (e) {
+    logError(e.toString());
+  }
+  return null;
+}
+
+Future<HttpData?> apiTaskPushInterest(String taskid) async {
+  try {
+    final url = "${GlobalData.hostBase}/apiTaskPushInterest";
+    final res = await dio.get(url,queryParameters: {"taskid":taskid});
+    if (res.statusCode == 200) {
+      return HttpData.fromJson(res.data);
+    }
+  } catch (e) {
+    logError(e.toString());
+  }
+  return null;
+}
+
+Future<void> apiTaskPullInterest(String taskid) async {
+  try {
+    final url = "${GlobalData.hostBase}/apiTaskPullInterest";
+    await dio.get(url,queryParameters: {"taskid":taskid});
+  } catch (e) {
+    logError(e.toString());
+  }
+}
+
+Future<List<JsonTaskInfo>?> apiLoadInterestTask(int skip) async {
+  try {
+    final url = "${GlobalData.hostBase}/apiLoadInterestTask";
+    final res = await dio.get(url,queryParameters: {"skip":skip});
+    if (res.statusCode == 200) {
+      var jsdata = HttpJsonTaskInfoList.fromJson(res.data);
+      if (jsdata.data == null && jsdata.code == 0) {
+        return [];
+      }
+	    return jsdata.data;
+    }else{
+      logError("${res.statusMessage}");
+    }
+  } catch (e) {
+    logError(e.toString());
+  }
+  return null;
+}
+
+Future<bool> apiSetUserIcon(String iconurl) async {
+  try {
+    final url = "${GlobalData.hostBase}/apiSetUserIcon";
+    final res = await dio.post(url,data:FormData.fromMap({"icon":iconurl}));
+    if (res.statusCode == 200) {
+      return HttpData.fromJson(res.data).code == 0;
+    }
+  } catch (e) {
+    logError(e.toString());
+  }
+  return false;
+}
+
+Future<void> apiAppCrash(String info) async {
+  try {
+    final url = "${GlobalData.hostBase}/apiAppCrash";
+    await dio.post(url,data:FormData.fromMap({"crash":info}));
+  } catch (e) {
+    logError(e.toString());
+  }
 }

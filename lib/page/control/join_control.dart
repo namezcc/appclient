@@ -7,7 +7,9 @@ class JoinControl extends TaskRefreshControl {
   
   @override
   Future<List<JsonTaskInfo>?> loadTask() async {
-    return await apiLoadJoinTaskList(taskSkip);
+    var res = await apiLoadJoinTaskList(taskSkip);
+    res = res?.reversed.toList();
+    return res;
     
   }
 }

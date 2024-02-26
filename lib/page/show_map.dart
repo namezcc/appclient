@@ -22,10 +22,10 @@ class GDMap extends StatefulWidget {
 }
 
 class _GDMap extends State<GDMap> {
-  late AMapController _mapController;
+  late AMapController? _mapController;
   final colorscheme = Get.theme.colorScheme;
   // Map<String, Object> _locationResult = {};
-  late StreamSubscription<Map<String, Object>> _locationListener;
+  StreamSubscription<Map<String, Object>>? _locationListener;
   int _positionIndex = 0;
   final AMapFlutterLocation _locationPlugin = AMapFlutterLocation();
   List<JsonAddressInfo> _address = [];
@@ -48,7 +48,7 @@ class _GDMap extends State<GDMap> {
     super.dispose();
 
     _scrollController.dispose();
-    _locationListener.cancel();
+    _locationListener?.cancel();
     _locationPlugin.destroy();
   }
 
@@ -81,7 +81,7 @@ class _GDMap extends State<GDMap> {
 
       // _mapController.moveCamera(CameraUpdate.newLatLng(LatLng(_locationResult["latitude"] as double, _locationResult["longitude"] as double)));
       if (_defaultLocation == null) {
-        _mapController.moveCamera(CameraUpdate.newLatLngZoom(LatLng(latitude, longitude),17));
+        _mapController?.moveCamera(CameraUpdate.newLatLngZoom(LatLng(latitude, longitude),17));
       }
       // _markers = {Marker(position: const LatLng(30.16, 120.12))};
     });
@@ -159,7 +159,7 @@ class _GDMap extends State<GDMap> {
           e.parseLocation();
         }
         var addres = pois.first;
-        _mapController.moveCamera(CameraUpdate.newLatLng(LatLng(addres.latitude, addres.longitude)));
+        _mapController?.moveCamera(CameraUpdate.newLatLng(LatLng(addres.latitude, addres.longitude)));
       }
 
       _scrollController.jumpTo(0);
@@ -172,6 +172,7 @@ class _GDMap extends State<GDMap> {
   @override
   Widget build(BuildContext context) {
     final AMapWidget map = AMapWidget(
+      privacyStatement: MapConfig.amapPrivacyStatement,
       apiKey: MapConfig.amapApiKeys,
       onMapCreated: onMapCreated,
       tiltGesturesEnabled: false,
@@ -288,7 +289,7 @@ class _GDMap extends State<GDMap> {
                               return;
                             }
                             
-                            _mapController.moveCamera(CameraUpdate.newLatLng(LatLng(addres.latitude, addres.longitude)));
+                            _mapController?.moveCamera(CameraUpdate.newLatLng(LatLng(addres.latitude, addres.longitude)));
                             setState(() {
                               _isMoveByList = true;
                               _positionIndex = index;

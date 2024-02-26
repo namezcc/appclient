@@ -5,9 +5,13 @@ import 'package:bangbang/handle/api_handle.dart';
 import 'package:bangbang/page/compnent/task_util.dart';
 import 'package:bangbang/page/compnent/tool_compnent.dart';
 import 'package:bangbang/page/control/home_control.dart';
+import 'package:bangbang/page/control/interest_task_control.dart';
 import 'package:bangbang/page/control/join_control.dart';
 import 'package:bangbang/page/control/message_control.dart';
 import 'package:bangbang/page/control/user_control.dart';
+import 'package:bangbang/page/report/report_task_page.dart';
+import 'package:bangbang/page/task/share_task_page.dart';
+import 'package:bangbang/page/task/share_task_user_page.dart';
 import 'package:bangbang/routes/app_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -50,15 +54,23 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
     if (images != null) {
       List<String> urls = TaskUtil.getImageUrls(_taskInfo);
       if (urls.isNotEmpty) {
+        List<Widget> images = [];
+        for (var urlstr in urls) {
+          images.add(
+            CachedNetworkImage(
+            imageUrl: urlstr,
+            fit: BoxFit.contain,
+            errorWidget: (context, url, error) => Container(alignment: Alignment.center,),
+            cacheManager: CustomCacheManager.instance,
+          )
+          );
+        }
         return Container(
           constraints:const BoxConstraints(
             maxHeight: 300
           ),
-          child: CachedNetworkImage(
-            imageUrl: urls[0],
-            fit: BoxFit.contain,
-            errorWidget: (context, url, error) => Container(alignment: Alignment.center,),
-            cacheManager: CustomCacheManager.instance,
+          child: PageView(
+            children: images,
           ),
         );
       }
@@ -130,6 +142,24 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
     }
   }
 
+  Widget getInterestState() {
+    return _userControl.isInterestTask(_taskInfo.id)? InkWell(
+      onTap: () {
+        Get.find<InterestControl>().pullTaskInterest(_taskInfo);
+        setState(() {
+        });
+      },
+      child: Icon(Icons.star_rate_rounded,color: colorscheme.primary,)):InkWell(
+        onTap: () async {
+          var res = await _userControl.pushTaskInterest(_taskInfo.id);
+          if (res) {
+            setState(() {
+            });
+          }
+        },
+        child: const Icon(Icons.star_border_rounded,));
+  }
+
   Widget getEditButton() {
     if (_userControl.userInfo.cid != _taskInfo.cid) {
       return const SizedBox();
@@ -165,7 +195,7 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
           child:Text("已完成"));
     }
     if (TaskUtil.inJoin(_taskInfo, _userControl.userInfo.cid)) {
-      return ElevatedButton(onPressed: () {
+      return FilledButton(onPressed: () {
         apiQuitTask(_taskInfo.id).then((value) {
           if (value != null) {
             _taskInfo.join = value.join;
@@ -179,14 +209,20 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
       }, child:const Text("退出"));
     }else{
       if (TaskUtil.canJoin(_taskInfo, _userControl.userInfo.sex)) {
-        return ElevatedButton(onPressed: () {
+        return FilledButton(onPressed: () {
           apiJoinTask(_taskInfo.id).then((value) {
             if (value == null) {
               showToastMsg("报名出错请重试");
             }else{
-              _taskInfo.join = value.join;
-              _joinControl.addTask(_taskInfo);
-              showToastMsg("报名成功");
+              if (value.code == 0) {
+                _taskInfo.join = value.data!.join;
+                _joinControl.addTask(_taskInfo);
+                showToastMsg("报名成功");
+              }else{
+                if (value.code == ErrorCode.errInBlackList) {
+                  showToastMsg("无法加入该用户的任务");
+                }
+              }
             }
           });
         }, child:const Text("报名"));
@@ -196,6 +232,58 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
           child:Text("已满"));
       }
     }
+  }
+
+  Widget buildOptButton() {
+    return Container(
+      height: 200,
+      decoration: BoxDecoration(
+        borderRadius:const BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10)),
+        color: colorscheme.background,
+      ),
+      child: Container(
+        margin:const EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            _taskInfo.cid == _userControl.userInfo.cid? ToolCompnent.buildGridIconChild("取消",const Icon(Icons.delete_forever),() {
+              
+            },):const SizedBox(),
+            ToolCompnent.buildGridIconChild("举报",const Icon(Icons.report_problem_rounded),() {
+              Get.back();
+              Get.to(()=> const ReportTaskPage(),arguments: {"taskid":_taskInfo.id});
+            },),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildShare() {
+    return Container(
+      height: 200,
+      width: Get.width,
+      decoration: BoxDecoration(
+        borderRadius:const BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10)),
+        color: colorscheme.background,
+      ),
+      child: Container(
+        margin:const EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+        child: ListView(
+          children: [
+            CupertinoButton(child:const Text("已报名"), onPressed: () {
+              Get.to(()=>const ShareTaskPage<JoinControl>(),arguments: {"task":_taskInfo});
+            },),
+            CupertinoButton(child:const Text("我的发布"), onPressed: () {
+              Get.to(()=>const ShareTaskPage<MessageControl>(),arguments: {"task":_taskInfo});
+            },),
+            CupertinoButton(child:const Text("私聊"), onPressed: () {
+              Get.to(()=>const ShareTaskUserPage(),arguments: {"task":_taskInfo});
+            },),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -215,22 +303,22 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
         ),
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundColor: colorscheme.secondary,
-            ),
+            ToolCompnent.toUserPage(ToolCompnent.headIcon(_taskInfo.creatorIcon??""),_taskInfo.cid),
             Text(_taskInfo.creatorName)
           ],
         ),
         titleSpacing: 0,
         actions: [
+          getInterestState(),
           getEditButton(),
-          TextButton(
+          IconButton(
             // padding:const EdgeInsets.all(0),
             onPressed: () {
               //deleteTask();
+              Get.bottomSheet(buildOptButton());
             },
             // minSize: 0,
-            child:const Icon(Icons.more_horiz_rounded),
+            icon: Icon(Icons.more_horiz_rounded,color: colorscheme.primary,),
           )
         ],
       ),
@@ -250,10 +338,9 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
                       return;
                     }
                     _loadState = LoadState.loading;
-                    var res = await apiUpdateOneTask(_taskInfo.id);
+                    var res = await _homeControl.loadTask(_taskInfo.id);
                     if (res != null) {
                       _taskInfo = res;
-                      _homeControl.updateAllTaskOne(res);
                     }
                     _loadState = LoadState.none;
                     _refreshController.refreshCompleted();
@@ -341,6 +428,9 @@ class _TaskInfoPageState extends State<TaskInfoPage> {
                   margin:const EdgeInsets.only(bottom: 10,left: 10,right: 10,top: 5),
                   child: Row(
                     children: [
+                      IconButton(onPressed: () {
+                        Get.bottomSheet(buildShare());
+                      }, icon:const Icon(Icons.ios_share)),
                       Expanded(
                         child:getOptButton(),
                       ),

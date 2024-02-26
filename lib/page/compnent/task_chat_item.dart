@@ -6,8 +6,10 @@ import 'package:bangbang/define/json_class.dart';
 import 'package:bangbang/handle/api_handle.dart';
 import 'package:bangbang/page/compnent/scale_animation.dart';
 import 'package:bangbang/page/compnent/task_util.dart';
+import 'package:bangbang/page/compnent/tool_compnent.dart';
 import 'package:bangbang/page/control/chat_data_control.dart';
 import 'package:bangbang/page/control/task_refresh_control.dart';
+import 'package:bangbang/util/db_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,10 +34,8 @@ class TaskChatItem extends StatelessWidget {
   Widget getNewChat(JsonChatInfo? chat) {
     var chatcolor = ChatDataControl.instance.haveNewRead(taskInfo.id) ? colorscheme.primary:colorscheme.tertiary;
     if (chat != null) {
-      if (chat.contentType == ChatContentType.image.index) {
-        return Text("${chat.sendername}:[图片]",style: TextStyle(overflow: TextOverflow.ellipsis,fontSize: 10,color: chatcolor),);
-      }
-      return Text("${chat.sendername}:${chat.content}",style: TextStyle(overflow: TextOverflow.ellipsis,fontSize: 10,color: chatcolor),);
+      var content = CommonUtil.getShortChatContent(chat.contentType,chat.content);
+      return Text("${chat.sendername}:$content",style: TextStyle(overflow: TextOverflow.ellipsis,fontSize: 10,color: chatcolor),);
     }
     return const SizedBox();
   }
@@ -119,11 +119,7 @@ class TaskChatItem extends StatelessWidget {
             minSize: 0,
             padding:const EdgeInsets.all(0),
             onPressed: () {
-              Get.defaultDialog(
-                title: "彻底删除",
-                content:const Text("删除后将接收不到消息"),
-                textConfirm: "删除",
-                textCancel: "取消",
+              ToolCompnent.iosDialog("彻底删除","删除后将接收不到消息","删除","取消",
                 onConfirm: () {
                   if (taskInfo.cid == cid) {
                     apiDeleteTask(taskInfo.id);
@@ -131,8 +127,11 @@ class TaskChatItem extends StatelessWidget {
                     apiDeleteUserJoin(taskInfo.id);
                   }
                   control.removeTask(taskInfo);
+                  // 删除聊天
+                  DbUtil.instance.deleteTaskChat(taskInfo.id);
                   Get.back();
                 },
+                onCancel: () => Get.back(),
               );
           }, child:const Icon(Icons.close,color: Colors.grey,size: 16,)),
         ],
@@ -159,21 +158,21 @@ class TaskChatItem extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  CircleAvatar(backgroundColor: colorscheme.secondary,),
+                  ToolCompnent.headIcon(taskInfo.creatorIcon??""),
                   const SizedBox(width: 10,),
-                  Text(taskInfo.creatorName,),
+                  Text(taskInfo.creatorName,style:const TextStyle(fontSize: 12,)),
                   const Expanded(child: SizedBox()),
                   Text(TaskUtil.getNumString(taskInfo),style:const TextStyle(fontSize: 12),),
                 ],
               ),
-              const Divider(indent: 5,endIndent: 5,),
+              const Divider(indent: 5,endIndent: 5,thickness: 0.5,),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(taskInfo.title,style:const TextStyle(fontSize: 14,fontWeight: FontWeight.w500),overflow: TextOverflow.ellipsis,),
+                      Text(taskInfo.title,style:const TextStyle(overflow: TextOverflow.ellipsis,)),//fontSize: 14,fontWeight: FontWeight.w500
                       getNewChat(chat)
                     ],
                   ),
@@ -190,7 +189,7 @@ class TaskChatItem extends StatelessWidget {
               const SizedBox(height: 5,),
               Row(
                 children: [
-                  Text(TaskUtil.getMoneyString(taskInfo),style: TextStyle(color: colorscheme.primary,fontSize: 12),),
+                  Text(TaskUtil.getMoneyString(taskInfo),style: TextStyle(color: colorscheme.primary,fontSize: 10),),
                   const Expanded(child: SizedBox()),
                   getTaskState()
                 ],

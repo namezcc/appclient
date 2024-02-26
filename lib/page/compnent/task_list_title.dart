@@ -70,7 +70,7 @@ class TaskListTitle extends StatelessWidget {
   }
 
   Widget getMoneyInfo() {
-    var style = TextStyle(color: colorscheme.primary,fontSize: 12);
+    var style = TextStyle(color: colorscheme.primary,fontSize: 10);//
     return Text(TaskUtil.getMoneyString(_taskInfo),style: style,);
   }
 
@@ -79,6 +79,8 @@ class TaskListTitle extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Card(
+        // color: colorscheme.surface,
+        // surfaceTintColor: colorscheme.surface,
         child: Container(
           padding:const EdgeInsets.symmetric(horizontal: 5),
           // decoration: BoxDecoration(
@@ -92,28 +94,31 @@ class TaskListTitle extends StatelessWidget {
                 children: [
                   Container(
                     margin:const EdgeInsets.only(top: 4,right: 3),
-                    child: CircleAvatar(
-                      backgroundColor: colorscheme.secondary,
-                    ),
+                    child:ToolCompnent.headIcon(_taskInfo.creatorIcon??""),
                   ),
-                  Text(_taskInfo.creatorName),
+                  Text(_taskInfo.creatorName,style:const TextStyle(fontSize: 12,)),
                   const Expanded(child: SizedBox()),
                   getNumInfo(),
-                  getDistance()
                 ],
               ),
-              Divider(indent: 5,endIndent: 5,color: colorscheme.surfaceVariant,),
+              Divider(indent: 5,endIndent: 5,color: colorscheme.surfaceVariant,thickness: 0.5,),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_taskInfo.title,style:const TextStyle(fontWeight: FontWeight.w600,fontSize: 18),),
+                  Text(_taskInfo.title,),//style:const TextStyle(fontWeight: FontWeight.w500,fontSize: 16),
                   const Expanded(child: SizedBox()),
                   getImage()
                 ],
               ),
               Container(
-                margin:const EdgeInsets.only(top: 5),
-                child: getMoneyInfo()
+                margin:const EdgeInsets.only(top: 5,bottom: 5),
+                child: Row(
+                  children: [
+                    getMoneyInfo(),
+                    const Expanded(child: SizedBox()),
+                    getDistance()
+                  ],
+                )
               )
             ],
           ),

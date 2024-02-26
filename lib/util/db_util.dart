@@ -2,7 +2,6 @@
 import 'dart:convert';
 
 import 'package:bangbang/common/common_util.dart';
-import 'package:bangbang/common/loger.dart';
 import 'package:bangbang/define/json_class.dart';
 import 'package:bangbang/define/table.dart';
 import 'package:sqflite/sqflite.dart';
@@ -34,15 +33,27 @@ class DbUtil {
   }
 
   void _onCreate(Database db, int newVersion) async{
-    logInfo("db create ");
+    // logInfo("db create ");
     var batch = db.batch();
     batch.execute(_drop(TableUtil.tabChat));
     batch.execute(TableUtil.createChat);
+    batch.execute(TableUtil.createChatUser);
+    batch.execute(TableUtil.createChatUserList);
     await batch.commit();
   }
 
   void _onOpen(Database db) async {
-    await db.execute(TableUtil.createReadHistory);
+    var batch = db.batch();
+    batch.execute(TableUtil.createReadHistory);
+    // batch.execute(_drop(TableUtil.tabChatUser));
+    batch.execute(TableUtil.createChatUser);
+    // batch.execute(_drop(TableUtil.tabChatUserList));
+    batch.execute(TableUtil.createChatUserList);
+    batch.execute(TableUtil.createBlackList);
+    batch.execute(TableUtil.createInterestTask);
+    batch.execute(TableUtil.createUserState);
+
+    await batch.commit();
     deleteReadTask(db);
   }
 
@@ -80,6 +91,11 @@ class DbUtil {
     return n;
   }
 
+  Future<int> deleteTaskChat(String taskid) async {
+    int n = await db.rawDelete('DELETE FROM ${TableUtil.tabChat} WHERE taskid=?;',[taskid]);
+    return n;
+  }
+
   Future<void> saveReadTask(JsonTaskInfo t) async {
     if (taskSave.contains(t.id)) {
       return;
@@ -104,5 +120,130 @@ class DbUtil {
       }
     }
     return data;
+  }
+
+  void saveChatUser(JsonChatUser c,{bool toList = false}) async {
+    var val = {
+      "keycid":c.cid,
+      "cid":c.cid,
+      "chatid":c.chatid,
+      "sendername":c.sendername,
+      "sendericon":c.sendericon,
+      "send_time":c.sendTime,
+      "content":c.content,
+      "content_type":c.contentType,
+    };
+    await db.insert(TableUtil.tabChatUser, val,conflictAlgorithm: ConflictAlgorithm.replace);
+    if (toList) {
+      val["read_chat_id"] = 0;
+      await db.insert(TableUtil.tabChatUserList, val,conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+  }
+
+  void saveSelfChatUser(JsonChatUser c,JsonSimpleUserInfo touser) async {
+    var val = {
+      "keycid":c.keycid,
+      "cid":c.cid,
+      "chatid":c.chatid,
+      "sendername":c.sendername,
+      "sendericon":c.sendericon,
+      "send_time":c.sendTime,
+      "content":c.content,
+      "content_type":c.contentType,
+    };
+    await db.insert(TableUtil.tabChatUser, val,conflictAlgorithm: ConflictAlgorithm.replace);
+
+    // list
+    val["read_chat_id"] = 1;
+    val["sendername"] = touser.name;
+    val["sendericon"] = touser.icon;
+    await db.insert(TableUtil.tabChatUserList, val,conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  void setChatUserRead(int cid,int readid) async {
+    await db.update(TableUtil.tabChatUserList,{"read_chat_id":readid},where: "keycid = ?",whereArgs: [cid],conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+
+  void setChatUserSended(int keycid,int cid,int oldred,int newread) async {
+    await db.update(TableUtil.tabChatUser,{"chatid":newread,"issend":1},where: "keycid = ? AND chatid = ? AND cid = ?",whereArgs: [keycid,oldred,cid],conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+
+  Future<List<JsonChatUser>> loadChatUser(int cid,int chatid) async {
+    List<JsonChatUser> res = [];
+
+    late List<Map<String, Object?>> qres;
+    if (chatid > 0) {
+      qres = await db.rawQuery("SELECT * FROM ${TableUtil.tabChatUser} WHERE keycid = ? AND chatid < ? ORDER BY chatid DESC LIMIT 20",[cid,chatid]);
+    }else{
+      qres = await db.rawQuery("SELECT * FROM ${TableUtil.tabChatUser} WHERE keycid = ? ORDER BY chatid DESC LIMIT 20",[cid]);
+    }
+
+    for (var e in qres) {
+      res.add(JsonChatUser.fromJson(e));
+    }
+    return res;
+  }
+
+  Future<List<JsonChatUser>> loadChatUserList(int skip) async {
+    List<JsonChatUser> res = [];
+    var qres = await db.query(TableUtil.tabChatUserList,orderBy: "send_time DESC",limit: 20,offset: skip);
+
+    for (var e in qres) {
+      res.add(JsonChatUser.fromJson(e));
+    }
+    return res;
+  }
+
+  Future<void> deleteChatUserList(int keycid) async {
+    db.delete(TableUtil.tabChatUserList,where: "keycid = ?",whereArgs: [keycid]);
+    db.delete(TableUtil.tabChatUser,where: "keycid = ?",whereArgs: [keycid]);
+  }
+
+  Future<int> getUserState(int id) async {
+    var res = await db.query(TableUtil.tabUserState,where: "id = ?",whereArgs: [id]);
+    if (res.isNotEmpty) {
+      return res.first["value"] as int;
+    }
+    return 0;
+  }
+
+  void setUserState(int id,int value) async {
+    await db.insert(TableUtil.tabUserState, {"id":id,"value":value},conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<List<int>> loadBlackList() async {
+    List<int> res = [];
+    
+    var qres = await db.query(TableUtil.tabBlackList);
+    for (var e in qres) {
+      res.add(e["cid"] as int);
+    }
+    return res;
+  }
+
+  void insertBlackList(int cid) async {
+    await db.insert(TableUtil.tabBlackList, {"cid":cid},conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  void deleteBlackList(int cid) async {
+    await db.delete(TableUtil.tabBlackList,where: "cid = ?",whereArgs: [cid]);
+  }
+
+  Future<List<String>> loadInterestTask() async {
+    List<String> res = [];
+    
+    var qres = await db.query(TableUtil.tabInterestTask);
+    for (var e in qres) {
+      res.add(e["taskid"] as String);
+    }
+    return res;
+  }
+
+  void insertInterestTask(String taskid) async {
+    await db.insert(TableUtil.tabInterestTask, {"taskid":taskid},conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  void deleteInterestTask(String taskid) async {
+    await db.delete(TableUtil.tabInterestTask,where: "taskid = ?",whereArgs: [taskid]);
   }
 }

@@ -24,16 +24,17 @@ class MapLocationControl extends GetxController {
 
     _locationListener = _locationPlugin.onLocationChanged().listen((event) { 
       logError(event.toString());
+      var addr = (event["address"] as String?)??"";
       myLocation = JsonAddressInfo(
-        event["address"] as String,
+        addr,
         "", 
-        event["city"] as String,
+        (event["city"] as String?)??"",
         "", 
-        event["address"] as String,""
+        addr,""
       );
 
-      var longitude = (event["longitude"] as num).toDouble();
-      var latitude = (event["latitude"] as num).toDouble();
+      var longitude = ((event["longitude"] as num?)??0).toDouble();
+      var latitude = (event["latitude"] as num? ?? 0).toDouble();
 
       //测试
       longitude = 120.12;
