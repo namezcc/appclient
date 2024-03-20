@@ -64,7 +64,9 @@ class TaskChatItem extends StatelessWidget {
     var str = "进行中";
     var colorOver = colorscheme.tertiary;
     Color? color = Colors.green;
-    if (taskInfo.delete > 0) {
+    if (taskInfo.state == TaskOpenState.incheck.index) {
+      ts = TaskState.incheck;
+    }else if (taskInfo.delete > 0) {
       ts = TaskState.delete;
     }else{
       if (cid == taskInfo.cid) {
@@ -100,7 +102,11 @@ class TaskChatItem extends StatelessWidget {
         }
       }
     }
-    if (ts == TaskState.over) {
+    
+    if (ts == TaskState.incheck) {
+      str = "审核中";
+      color = colorscheme.primary;
+    }else if (ts == TaskState.over) {
       str = "已完成";
       color = colorOver;
     }else if(ts == TaskState.reward){

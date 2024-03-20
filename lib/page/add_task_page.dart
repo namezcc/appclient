@@ -159,6 +159,7 @@ class _AddTaskPage extends State<AddTaskPage> {
     var total = int.parse(_textManNum.text) + int.parse(_textWomanNum.text);
     if (total <= 0 || total > 100) {
       showToastMsg("总人数需在 1~100 之间");
+      return false;
     }
     return true;
   }

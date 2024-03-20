@@ -50,6 +50,7 @@ enum FinishState {
 }
 
 enum TaskState {
+  incheck,
   active,
   reward,
   over,
@@ -106,4 +107,10 @@ class ErrorCode {
 enum DbUserState {
   loadBlackList,
   loadInterestTask,
+}
+
+enum TaskOpenState {
+  incheck,
+  open,
+  finish,
 }
